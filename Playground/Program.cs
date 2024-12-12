@@ -6,9 +6,6 @@ internal class Program {
 
     static void Main(string[] args) {
         List<int> p = new();
-        p.
-        p.Add(1);
-        int i = p[2];
     }
 }
 

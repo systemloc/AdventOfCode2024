@@ -188,11 +188,3 @@ internal class Program {
         }
     }
 }
-
-private class Lum {
-    private void sdoin() {
-
-
-
-    }
-}
