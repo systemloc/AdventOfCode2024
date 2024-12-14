@@ -6,30 +6,31 @@ using System.Text.RegularExpressions;
 
 namespace MyUtils;
 public class Grid : IEnumerable<char> {
-    char[,] _grid;
-    public int Height => _grid.Count;
-    public int Width => _grid[0].Count;
+    char[] _grid;
+    public int Length = 0;
+    public int Width = 0;
 
     public GridPosition Position = new();
 
-    public Grid(int x, int y) {
-        _grid = new char[x, y];
+    public Grid(int Width, int Length) {
+        _grid = new char[Width * Length];
     }
 
-    public void ParseString(string input) {
+    public Grid(string input) {
         string[] _rows = input.Split('\n', StringSplitOptions.TrimEntries);
-        int gridWidth = _rows[0].Length;
-        int gridLength = _rows.Length;
-        _grid = new char[gridWidth, gridLength];
+        Width = _rows[0].Length;
+        Length = _rows.Length;
+        _grid = new char[Width * Length];
 
-        foreach (string _row in _rows)
-            _grid.Add(_row.TrimEnd().ToList());
-        this.FindPerson();
+        for (int row=0;  row<Length; row++) 
+            Buffer.BlockCopy(_rows[row].ToCharArray(), 0*sizeof(char), 
+                            _grid, row*Width*sizeof(char), 
+                            Length * sizeof(char));
     }
 
     public bool IsValid(GridPosition position) {
         if (position.Row >= 0
-            && position.Row < this.Height
+            && position.Row < this.Length
             && position.Column >= 0
             && position.Column < this.Width)
             return true;
@@ -39,17 +40,17 @@ public class Grid : IEnumerable<char> {
 
     public char Value(GridPosition position) {
         if (this.IsValid(position))
-            return _grid[position.Row][position.Column];
+            return _grid[position.Row * Width + position.Column];
         else
             throw new Exception("Invalid grid position");
     }
 
     public char Value(GridPosition position, char input) {
         if (this.IsValid(position))
-            _grid[position.Row][position.Column] = input;
+            _grid[position.Row * Width + position.Column] = input;
         else
             throw new Exception("Invalid grid position");
-        return _grid[position.Row][position.Column];
+        return _grid[position.Row * Width + position.Column];
     }
 
     public void FindPerson() {
@@ -104,10 +105,10 @@ public class Grid : IEnumerable<char> {
     }
 
     public void PrintGrid() {
-        foreach (List<char> gridLine in _grid) {
-            foreach (char c in gridLine)
-                Console.Write(c);
-            Console.WriteLine();
+        Span<char> grid = _grid;
+        for (int row = 0; row < Length; row++) {
+            Console.WriteLine(
+                grid.Slice(row * Width, Length).ToString());
         }
     }
 
@@ -174,13 +175,13 @@ public class Grid : IEnumerable<char> {
 }
 
 public class GridPosition {
-    public int Row = 0;
     public int Column = -1;
+    public int Row = 0;
 
     public GridPosition() { }
-    public GridPosition(int row, int column) {
-        this.Row = row;
+    public GridPosition(int column, int row) {
         this.Column = column;
+        this.Row = row;
     }
 
     public GridPosition Left(int distance) =>
